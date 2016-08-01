@@ -1,0 +1,4 @@
+
+object Foo {
+  println("Hello")
+}
