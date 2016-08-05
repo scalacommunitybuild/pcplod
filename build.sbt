@@ -3,7 +3,17 @@
 lazy val commonSettings = Seq(
   organization := "org.ensime",
   version := "0.1.0",
-  scalaVersion := "2.11.8"
+  scalaVersion := "2.11.8",
+  dependencyOverrides ++= Set(
+    "org.scala-lang" % "scala-compiler" % scalaVersion.value,
+    "org.scala-lang" % "scala-library" % scalaVersion.value,
+    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+    "org.scala-lang" % "scalap" % scalaVersion.value,
+    "org.scala-lang.modules" %% "scala-xml" % "1.0.4",
+    "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
+    "org.scalamacros" %% "quasiquotes" % "2.0.1",
+    "org.slf4j" % "slf4j-api" % "1.7.12"
+  )
 )
 
 val akkaVersion = "2.3.14"
@@ -25,7 +35,6 @@ def testLibs(scalaV: String, config: String = "test") = Seq(
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion % config
 ) ++ logback.map(_ % config)
 
-
 lazy val root = (project in file(".")).settings(
   commonSettings: _*).settings(
   libraryDependencies ++= Seq(
@@ -35,6 +44,8 @@ lazy val root = (project in file(".")).settings(
   ).dependsOn(
     testingSimple % "test"
 )
+
+lazy val testingEmpty = project.in(file("testing/empty")).settings(commonSettings: _*)
 
 lazy val testingSimple = project.in(file("testing/simple")).settings(commonSettings: _*)
 
