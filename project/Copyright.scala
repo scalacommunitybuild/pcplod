@@ -5,7 +5,7 @@ import scala.util.matching.Regex
 object Copyright {
   val HeaderRegex = "(?s)(// Copyright[^\\n]*[\\n]// Licen[cs]e[^\\n]*[\\n])(.*)".r
 
-  val CopyrightHeader = "// Copyright: 2010 - 2016 https://github.com/ensime/ensime-server/graphs"
+  val CopyrightHeader = "// Copyright: 2016 https://github.com/ensime/pcplod/graphs"
   val ApacheHeader = "// License: http://www.apache.org/licenses/LICENSE-2.0"
   val GplHeader = "// License: http://www.gnu.org/licenses/gpl-3.0.en.html"
 

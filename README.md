@@ -37,7 +37,7 @@ PC Plod uses the *loan pattern* to let you write tests in whatever testing frame
 
 ### Loading Scala Sources
 
-Since you're simulating a scala developer who is using your macro / plugin to write scala code, you put the code that you want to test into the `test/resources` folder of your project (not `test/scala`). Add source files as needed
+Since you're simulating a scala developer who is using your macro / plugin to write scala code, you put the code that you want to test into the `test/resources` folder of your project (not `test/scala`). Add source resources as needed
 
 ```scala
 withPcPlod { pc =>
@@ -49,7 +49,7 @@ withPcPlod { pc =>
 }
 ```
 
-there is also a simplified variant (Mr Plod) which only supports one source file (a simpler assertion API)
+there is also a simplified variant (Mr Plod) which only supports one source (a simpler assertion API)
 
 ```scala
 withMrPlod("path/to/package/foo.scala") { mr =>
@@ -61,23 +61,25 @@ withMrPlod("path/to/package/foo.scala") { mr =>
 
 The `PcPlod` instance has the following main assertions:
 
-- `symbolAtPoint(file: String, p: Point): Option[String]` - the name of the symbol at point.
-- `typeAtPoint(file: String, p: Point): Option[String]` - the return type of the symbol at the point.
+- `symbolAtPoint(res: String, p: Point): Option[String]` - the name of the symbol at point.
+- `typeAtPoint(res: String, p: Point): Option[String]` - the return type of the symbol at the point.
 - `messages: List[PcMessage]`
 
 Typically if `symbolAtPoint` or `typeAtPoint` do not work (or there are any errors) then your code is not expected to work in the presentation compiler.
 
-A variant of `typeAtPoint` and `symbolAtPoint` without the `file` is provided for `withMrPlod`.
+A variant of `typeAtPoint` and `symbolAtPoint` without the `res` is provided for `withMrPlod`.
 
 An implicit conversion for Point means that any of the following can be provided in its place:
 
-- `Int` the number of characters into a file
+- `Int` the number of characters
 - `(Int, Int)` the line and column
-- `Symbol` corresponding to *noddy syntax* in the source files
+- `Symbol` corresponding to *noddy syntax*
+
+with all counting from zero.
 
 ### Noddy Syntax
 
-Instead of having to manually count the location in the source file, you can augment your test sources with a `@noddy_syntax@` that will be stripped and treated as meta data when loaded:
+Instead of having to manually count the location in the source, you can augment your test sources with a `@noddy_syntax@` that will be stripped and treated as meta data when loaded:
 
 ```scala
 object F@foo@oo {
