@@ -4,10 +4,16 @@ package org.ensime
 
 package object pcplod {
 
-  def withPcPlod[T](classpath: String)(pc: PcPlod => T): T = ???
-  def withPcPlod[T](pc: PcPlod => T): T = ???
+  def withPcPlod[T](classpath: String)(f: PcPlod => T): T = {
+    f(PcPlod(classpath))
+  }
+  def withPcPlod[T](f: PcPlod => T): T = {
+    f(PcPlod())
+  }
 
-  def withMrPlod[T](res: String)(f: MrPlod => T): T = ???
+  def withMrPlod[T](res: String)(f: MrPlod => T): T = {
+    f(MrPlod(res))
+  }
 
   implicit def posToPoint(pos: Int): Point = PositionPoint(pos)
   implicit def lineColToPoint(lc: (Int, Int)): Point = LineColumnPoint(lc._1, lc._2)
