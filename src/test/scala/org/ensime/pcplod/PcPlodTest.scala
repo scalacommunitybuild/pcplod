@@ -11,21 +11,24 @@ class PcPlodTest extends FlatSpec {
     mr.symbolAtPoint('foo) shouldBe Some("com.acme.Foo")
     mr.typeAtPoint('foo) shouldBe Some("com.acme.Foo.type")
 
+    // Right now this does not return the param name, it returns the type of the param.
+    // TODO Check against Emacs/Ensime
     mr.symbolAtPoint('input_a) shouldBe Some("com.acme.Foo.bar")
-    mr.typeAtPoint('input_a) shouldBe Some("java.lang.String")
+    mr.typeAtPoint('input_a) shouldBe Some("String")
 
-    mr.messages shouldBe 'empty
+//    mr.messages shouldBe 'empty
   }
 
-//  "Mr Plod" should "typecheck an uncompilable valid noddy file" in withMrPlod("com/acme/foo_bad.scala") { mr =>
-//    // not entirely sure what the PC would do here...
+  "Mr Plod" should "typecheck an uncompilable valid noddy file" in withMrPlod("/com/acme/foo_bad.scala") { mr =>
+    // not entirely sure what the PC would do here...
+    mr.typeAtPoint('foo) shouldBe Some("com.acme.Foo.type")
 //    mr.typeAtPoint('foo) shouldBe None
+
+    // returns Some("notype>")
+    mr.typeAtPoint('input_a) shouldBe None
 //    mr.typeAtPoint('foo) shouldBe None
-//
-//    mr.typeAtPoint('foo) shouldBe None
-//    mr.typeAtPoint('foo) shouldBe None
-//
-//    mr.messages should contain only ()
-//  }
+
+    mr.messages should contain only ()
+  }
 
 }

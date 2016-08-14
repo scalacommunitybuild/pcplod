@@ -114,11 +114,33 @@ class PcPlod(classpath: String, scalaLibrary: String) {
       case None =>
         throw new IllegalArgumentException(s"res $res not loaded in PC")
     }
-
-
   }
 
-  def typeAtPoint(res: String, p: Point): Option[String] = ???
+  def typeAtPoint(res: String, p: Point): Option[String] = {
+    // retrieve and use the FileInfo for the loaded file.
+    files.get(res) match {
+      case Some(fi) =>
+        val idx: Int = p match {
+          case NoddyPoint(symbol) =>
+            val rawName = symbol.name
+            fi.tokenLocations.get(rawName) match {
+              case Some(filePos) =>
+                filePos
+              case None =>
+                throw new IllegalArgumentException(s"Token $symbol not found in $res")
+            }
+          case PositionPoint(filePos) =>
+            filePos
+          case LineColumnPoint(line, col) =>
+            // TODO
+            ???
+        }
+        pc.askTypeAt(fi.f, idx)
+      case None =>
+        throw new IllegalArgumentException(s"res $res not loaded in PC")
+    }
+  }
+
   def messages: List[PcMessage] = ???
 
 }

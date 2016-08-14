@@ -15,7 +15,7 @@ trait RichishCompilerControl extends CompilerControl {
 
   //  def charset: Charset = Charset.forName(settings.encoding.value)
 
-  def askOption[A](op: => A): Option[A] =
+  def askOption[A](op: => A): Option[A] = {
     try {
       Some(ask(() => op))
     } catch {
@@ -26,15 +26,42 @@ trait RichishCompilerControl extends CompilerControl {
             println("interrupted exception in askOption:" + e)
             None
           case e =>
-            println("Error during askOption:" +  e)
+            println("Error during askOption:" + e)
             None
         }
       case e: Throwable =>
-        println("Error during askOption:" +  e)
+        println("Error during askOption:" + e)
         None
     }
+  }
 
-  //  def askDocSignatureAtPoint(p: Position): Option[DocSigPair] =
+  private def typeOfTree(t: Tree): Option[Type] = {
+    val tree = t match {
+      case Select(qualifier, name) if t.tpe == ErrorType =>
+        qualifier
+      case t: ImplDef if t.impl != null =>
+        t.impl
+      case t: ValOrDefDef if t.tpt != null =>
+        t.tpt
+      case t: ValOrDefDef if t.rhs != null =>
+        t.rhs
+      case otherTree =>
+        otherTree
+    }
+
+    Option(tree.tpe)
+  }
+
+
+  protected def typeAt(p: Position): Option[Type] = {
+    wrapTypedTreeAt(p) match {
+      case Import(_, _) => symbolAt(p).map(_.tpe)
+      case tree => typeOfTree(tree)
+    }
+  }
+
+
+    //  def askDocSignatureAtPoint(p: Position): Option[DocSigPair] =
   //    askOption {
   //      symbolAt(p).orElse(typeAt(p).map(_.typeSymbol)).flatMap(docSignature(_, Some(p)))
   //    }.flatten
@@ -275,7 +302,29 @@ class RichishPresentationCompiler(
   def askSymbolInfoAt(f: BatchSourceFile, idx: Int): Option[String] = {
     val pos = new OffsetPosition(f, idx)
     // TODO - .fullName may be the wrong call
-    askOption (symbolAt(pos).map(x => x.fullName)).flatten
+    askOption(symbolAt(pos).map{
+      (x: Symbol) =>
+        // For debugging
+        println("-------------------")
+        println(x.fullName)
+        println(x.toString())
+        println(x.decodedName)
+        println(x.fullNameString)
+        println(x.encodedName)
+        x.fullName
+    }).flatten
   }
 
+  def askTypeAt(f: BatchSourceFile, idx: Int): Option[String] = {
+    val pos = new OffsetPosition(f, idx)
+    askOption(typeAt(pos).map {
+      (x: Type) =>
+//        println("=================")
+//        println(x.safeToString)
+//        println(x.toString())
+//        println(x.toLongString)
+//        println(x.directObjectString)
+        x.safeToString
+    }).flatten
+  }
 }
