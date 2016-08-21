@@ -7,6 +7,11 @@ import sbt._
 
 import scala.util.Properties
 
+trait SensiblePlugin extends AutoPlugin {
+  override def requires = plugins.JvmPlugin
+  override def trigger = allRequirements
+}
+
 /**
  * A bunch of sensible defaults that fommil typically uses.
  */
@@ -134,7 +139,7 @@ object Sensible {
   def shapeless(scalaVersion: String) = {
     if (scalaVersion.startsWith("2.10.")) macroParadise
     else Nil
-  } :+ "com.chuusai" %% "shapeless" % "2.3.1"
+  } :+ "com.chuusai" %% "shapeless" % "2.3.2"
   val logback = Seq(
     "ch.qos.logback" % "logback-classic" % "1.1.7",
     "org.slf4j" % "slf4j-api" % logbackVersion,

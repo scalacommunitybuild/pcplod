@@ -1,3 +1,5 @@
+// Copyright: 2010 - 2016 Rory Graves, Sam Halliday
+// License: http://www.apache.org/licenses/LICENSE-2.0
 package org.ensime.pcplod.internal
 
 import org.ensime.pcplod.{Point, PositionPoint}

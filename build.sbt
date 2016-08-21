@@ -1,20 +1,17 @@
-import scalariform.formatter.preferences._
+lazy val pcplod = project.settings(
+  libraryDependencies ++= Seq(
+    "org.scala-lang" % "scala-compiler" % scalaVersion.value,
+    "org.scala-lang" % "scala-reflect" % scalaVersion.value
+  )
+)
 
-organization := "org.ensime"
-name := "pcplod"
-version := "1.0.0-SNAPSHOT"
-
-scalaVersion := "2.11.8"
-
-Sensible.settings
-
-SonatypeSupport.sonatype("ensime", "pcplod", SonatypeSupport.Apache2)
-headers := Copyright.ApacheMap
-
-scalariformPreferences := FormattingPreferences().setPreference(AlignSingleLineCaseStatements, true)
-
-libraryDependencies ++= Seq(
-  "org.scala-lang" % "scala-compiler" % scalaVersion.value,
-  "org.scala-lang" % "scala-reflect" % scalaVersion.value
-
-) ++ Sensible.testLibs()
+lazy val example = project.dependsOn(pcplod % "test").settings(
+  libraryDependencies ++= Seq(
+    "org.scala-lang" % "scala-compiler" % scalaVersion.value,
+    "org.scala-lang" % "scala-reflect" % scalaVersion.value
+  ),
+  scalacOptions in Test <++= (packageBin in Compile) map { jar =>
+    // needs timestamp to force recompile
+    Seq("-Xplugin:" + jar.getAbsolutePath, "-Jdummy=" + jar.lastModified)
+  }
+)

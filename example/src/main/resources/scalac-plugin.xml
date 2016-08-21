@@ -1,0 +1,4 @@
+<plugin>
+  <name>noddy</name>
+  <classname>org.ensime.noddy.NoddyPlugin</classname>
+</plugin>

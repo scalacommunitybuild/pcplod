@@ -1,4 +1,4 @@
-// Copyright: 2016 https://github.com/ensime/pcplod/graphs
+// Copyright: 2010 - 2016 Rory Graves, Sam Halliday
 // License: http://www.apache.org/licenses/LICENSE-2.0
 package org.ensime.pcplod
 
@@ -18,49 +18,50 @@ object PcPlod {
     apply("")
   }
 
-//  def main(args: Array[String]): Unit = {
-//
-//    val text = """// Copyright: 2016 https://github.com/ensime/pcplod/graphs
-//                 |// License: http://www.apache.org/licenses/LICENSE-2.0
-//                 |package com.acme
-//                 |
-//                 |object F@foo@oo {
-//                 |  def bar(a@input_a@: String): Int = ???
-//                 |}""".stripMargin
-//
-//    val text2 =
-//      """fadf@foo@blah\nabc""".stripMargin
-//
-//    @tailrec
-//    def extractSymbols(contents: String, symbols: Map[String, Int]): (String, Map[String, Int]) = {
-//      contents match {
-//        case R(prequal, tag, sequal) =>
-//          println("HERE")
-//          extractSymbols(prequal + sequal, symbols + (tag -> prequal.size))
-//        case _ =>
-//          (contents, symbols)
-//      }
-//    }
-//    println(extractSymbols(text, Map.empty))
-//
-//  }
+  //  def main(args: Array[String]): Unit = {
+  //
+  //    val text = """// Copyright: 2016 https://github.com/ensime/pcplod/graphs
+  //                 |// License: http://www.apache.org/licenses/LICENSE-2.0
+  //                 |package com.acme
+  //                 |
+  //                 |object F@foo@oo {
+  //                 |  def bar(a@input_a@: String): Int = ???
+  //                 |}""".stripMargin
+  //
+  //    val text2 =
+  //      """fadf@foo@blah\nabc""".stripMargin
+  //
+  //    @tailrec
+  //    def extractSymbols(contents: String, symbols: Map[String, Int]): (String, Map[String, Int]) = {
+  //      contents match {
+  //        case R(prequal, tag, sequal) =>
+  //          println("HERE")
+  //          extractSymbols(prequal + sequal, symbols + (tag -> prequal.size))
+  //        case _ =>
+  //          (contents, symbols)
+  //      }
+  //    }
+  //    println(extractSymbols(text, Map.empty))
+  //
+  //  }
 }
 
 class PcPlod(classpath: String, scalaLibrary: String) {
 
   case class FileInfo(path: String, contents: String, tokenLocations: Map[String, Int], f: BatchSourceFile)
 
-  private var files: Map[String,FileInfo] = Map.empty
+  private var files: Map[String, FileInfo] = Map.empty
   val pc = RichishPresentationCompiler.create(scalaLibrary, classpath)
 
-  /** Load a Scala file into the PC - the file is a resource location
-    * N.b. the file contains tags (surrounded by @, to denote interesting locations in the code, these are stripped out
-    * here.
-    * @param res A resource file containing the contents
-    */
+  /**
+   * Load a Scala file into the PC - the file is a resource location
+   * N.b. the file contains tags (surrounded by @, to denote interesting locations in the code, these are stripped out
+   * here.
+   * @param res A resource file containing the contents
+   */
   def loadScala(res: String): Unit = {
-    val stream : InputStream = getClass.getResourceAsStream(res)
-    val rawContents = scala.io.Source.fromInputStream( stream ).getLines.mkString("\n")
+    val stream: InputStream = getClass.getResourceAsStream(res)
+    val rawContents = scala.io.Source.fromInputStream(stream).getLines.mkString("\n")
     val (contents, symbols) = parseFile(rawContents)
     val f = pc.loadFile(res, contents)
     println("SLEEP TO MAKE IT WORK! - NEEDS FIX")
@@ -70,7 +71,6 @@ class PcPlod(classpath: String, scalaLibrary: String) {
   }
 
   val TokenRegex = "(?s)^(.*)@([^@]+)@(.*)$".r
-
 
   def parseFile(rawContents: String): (String, Map[String, Int]) = {
     import scala.annotation.tailrec
