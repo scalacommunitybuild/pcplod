@@ -105,3 +105,29 @@ withPcPlod(classpath) { pc =>
 ```
 
 using an sbt configuration such as ???
+
+## Example ENSIME Integration
+
+To add the example compiler plugin example to ENSIME, automatically compiling the plugin first, add this file to your local clone of the repository in `project/EnsimeProjectSettings.scala` (this could also be adapted to work as a `local.sbt`)
+
+```scala
+import sbt._
+import Keys._
+import org.ensime.Imports.EnsimeKeys._
+import org.ensime.CommandSupport._
+
+object EnsimeProjectSettings extends AutoPlugin {
+  override def requires = org.ensime.EnsimePlugin
+  override def trigger = allRequirements
+
+  override def projectSettings = Seq(
+    ensimeCompilerArgs <+= state.map { implicit s =>
+      // ensures the jar is built first
+      implicit val structure = Project.extract(s).structure
+      implicit val plugin = structure.allProjectRefs.find(_.project == "example").get
+      val jar = (packageBin in plugin in Compile).run
+      s"-Xplugin:${jar.getCanonicalPath}"
+    }
+  )
+}
+```

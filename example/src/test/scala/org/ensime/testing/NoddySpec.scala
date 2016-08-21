@@ -52,7 +52,6 @@ class LoggingFutures(a: String, b: Long) {
 object LoggingFutures {
   def exposed = log
 
-  // FIXME: these need to be implemented by the plugin
   def a: Future[String] = null
   def b: Future[Long] = null
 }

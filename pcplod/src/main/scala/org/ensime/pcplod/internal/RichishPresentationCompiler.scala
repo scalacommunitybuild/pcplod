@@ -204,7 +204,6 @@ trait RichishCompilerControl extends CompilerControl {
   //    _.file.path == path
   //  )
 
-  //  // TODO: friends should not give friends other people's types (Position)
   //  def askLinkPos(sym: Symbol, path: AbstractFile): Option[Position] =
   //  askOption(linkPos(sym, createSourceFile(path)))
   //}
@@ -238,7 +237,6 @@ class RichishPresentationCompiler(
     f
   }
 
-  // TODO Unused - remove?
   def loadFile(path: String): Unit = {
     val f = createSourceFile(path)
 
@@ -303,7 +301,6 @@ class RichishPresentationCompiler(
 
   def askSymbolInfoAt(f: BatchSourceFile, idx: Int): Option[String] = {
     val pos = new OffsetPosition(f, idx)
-    // TODO - .fullName may be the wrong call
     askOption(symbolAt(pos).map{
       (x: Symbol) =>
         // For debugging

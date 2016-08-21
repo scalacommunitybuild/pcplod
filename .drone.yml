@@ -20,7 +20,7 @@ build:
       fi
     - sbt ++$SCALA_VERSION ";test"
     - if [ -z "$CI_PULL_REQUEST" ] ; then
-        sbt ++$SCALA_VERSION publish ;
+        sbt ++$SCALA_VERSION pcplod/publish ;
       fi
 
 matrix:

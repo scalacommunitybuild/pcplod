@@ -65,7 +65,7 @@ class PcPlod(classpath: String, scalaLibrary: String) {
     val (contents, symbols) = parseFile(rawContents)
     val f = pc.loadFile(res, contents)
     println("SLEEP TO MAKE IT WORK! - NEEDS FIX")
-    Thread.sleep(5000) // TODO We need to wait until the compiler is finished loading the file.
+    Thread.sleep(5000) // We need to wait until the compiler is finished loading the file.
     val fileInfo = FileInfo(res, contents, symbols, f)
     files += res -> fileInfo
   }
@@ -107,7 +107,6 @@ class PcPlod(classpath: String, scalaLibrary: String) {
           case PositionPoint(filePos) =>
             filePos
           case LineColumnPoint(line, col) =>
-            // TODO
             ???
         }
         pc.askSymbolInfoAt(fi.f, idx)
@@ -132,7 +131,6 @@ class PcPlod(classpath: String, scalaLibrary: String) {
           case PositionPoint(filePos) =>
             filePos
           case LineColumnPoint(line, col) =>
-            // TODO
             ???
         }
         pc.askTypeAt(fi.f, idx)

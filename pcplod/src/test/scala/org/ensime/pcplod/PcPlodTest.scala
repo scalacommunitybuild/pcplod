@@ -12,7 +12,7 @@ class PcPlodTest extends FlatSpec {
     mr.typeAtPoint('foo) shouldBe Some("com.acme.Foo.type")
 
     // Right now this does not return the param name, it returns the type of the param.
-    // TODO Check against Emacs/Ensime
+    // this is the wrong assertion
     mr.symbolAtPoint('input_a) shouldBe Some("com.acme.Foo.bar")
     mr.typeAtPoint('input_a) shouldBe Some("String")
 
