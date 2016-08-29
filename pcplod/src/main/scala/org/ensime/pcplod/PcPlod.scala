@@ -4,6 +4,7 @@ package org.ensime.pcplod
 
 import java.io.InputStream
 
+import org.ensime.pcplod.PcPlod.CompilerInfo
 import org.ensime.pcplod.internal.RichishPresentationCompiler
 
 import scala.reflect.internal.util.BatchSourceFile
@@ -16,6 +17,8 @@ object PcPlod {
   def apply(): PcPlod = {
     apply("")
   }
+
+  case class CompilerInfo(file: String)
 }
 
 class PcPlod(classpath: String, scalaLibrary: String) {
@@ -40,11 +43,18 @@ class PcPlod(classpath: String, scalaLibrary: String) {
     files += res -> fileInfo
   }
 
-  def checkReporter = {
-    reporter.infos.head
-    println("------------------")
-    println(reporter.infos)
-    println("------------------")
+  def compilerWarnings: List[PcMessage] = {
+    reporter.infos.toList.map { info =>
+        val severity = info.severity match {
+          case `reporter`.INFO =>
+            PcMessageSeverity.Info
+          case `reporter`.WARNING =>
+            PcMessageSeverity.Warning
+          case `reporter`.ERROR =>
+            PcMessageSeverity.Error
+        }
+        PcMessage(info.pos.source.file.toString, severity, info.msg)
+    }
   }
   val TokenRegex = "(?s)^([^@]*)@([^@]+)@(.*)$".r
 
@@ -116,8 +126,7 @@ class PcPlod(classpath: String, scalaLibrary: String) {
   }
 
   def messages: List[PcMessage] = {
-    checkReporter
-    List.empty
+    compilerWarnings
   }
 
 }
