@@ -6,8 +6,7 @@ import java.io.InputStream
 
 import org.ensime.pcplod.internal.RichishPresentationCompiler
 
-import scala.annotation.tailrec
-import scala.reflect.internal.util.{BatchSourceFile, OffsetPosition}
+import scala.reflect.internal.util.BatchSourceFile
 
 object PcPlod {
   def apply(classpath: String): PcPlod = {
@@ -17,33 +16,6 @@ object PcPlod {
   def apply(): PcPlod = {
     apply("")
   }
-
-  //  def main(args: Array[String]): Unit = {
-  //
-  //    val text = """// Copyright: 2016 https://github.com/ensime/pcplod/graphs
-  //                 |// License: http://www.apache.org/licenses/LICENSE-2.0
-  //                 |package com.acme
-  //                 |
-  //                 |object F@foo@oo {
-  //                 |  def bar(a@input_a@: String): Int = ???
-  //                 |}""".stripMargin
-  //
-  //    val text2 =
-  //      """fadf@foo@blah\nabc""".stripMargin
-  //
-  //    @tailrec
-  //    def extractSymbols(contents: String, symbols: Map[String, Int]): (String, Map[String, Int]) = {
-  //      contents match {
-  //        case R(prequal, tag, sequal) =>
-  //          println("HERE")
-  //          extractSymbols(prequal + sequal, symbols + (tag -> prequal.size))
-  //        case _ =>
-  //          (contents, symbols)
-  //      }
-  //    }
-  //    println(extractSymbols(text, Map.empty))
-  //
-  //  }
 }
 
 class PcPlod(classpath: String, scalaLibrary: String) {
@@ -51,7 +23,7 @@ class PcPlod(classpath: String, scalaLibrary: String) {
   case class FileInfo(path: String, contents: String, tokenLocations: Map[String, Int], f: BatchSourceFile)
 
   private var files: Map[String, FileInfo] = Map.empty
-  val pc = RichishPresentationCompiler.create(scalaLibrary, classpath)
+  val (pc, reporter) = RichishPresentationCompiler.create(scalaLibrary, classpath)
 
   /**
    * Load a Scala file into the PC - the file is a resource location
@@ -64,21 +36,25 @@ class PcPlod(classpath: String, scalaLibrary: String) {
     val rawContents = scala.io.Source.fromInputStream(stream).getLines.mkString("\n")
     val (contents, symbols) = parseFile(rawContents)
     val f = pc.loadFile(res, contents)
-    println("SLEEP TO MAKE IT WORK! - NEEDS FIX")
-    Thread.sleep(5000) // We need to wait until the compiler is finished loading the file.
     val fileInfo = FileInfo(res, contents, symbols, f)
     files += res -> fileInfo
   }
 
-  val TokenRegex = "(?s)^(.*)@([^@]+)@(.*)$".r
+  def checkReporter = {
+    reporter.infos.head
+    println("------------------")
+    println(reporter.infos)
+    println("------------------")
+  }
+  val TokenRegex = "(?s)^([^@]*)@([^@]+)@(.*)$".r
 
   def parseFile(rawContents: String): (String, Map[String, Int]) = {
     import scala.annotation.tailrec
     @tailrec
     def extractSymbols(contents: String, symbols: Map[String, Int]): (String, Map[String, Int]) = {
       contents match {
-        case TokenRegex(prequal, tag, sequal) =>
-          extractSymbols(prequal + sequal, symbols + (tag -> prequal.size))
+        case TokenRegex(prequel, tag, sequel) =>
+          extractSymbols(prequel + sequel, symbols + (tag -> prequel.length))
         case _ =>
           (contents, symbols)
       }
@@ -139,7 +115,10 @@ class PcPlod(classpath: String, scalaLibrary: String) {
     }
   }
 
-  def messages: List[PcMessage] = ???
+  def messages: List[PcMessage] = {
+    checkReporter
+    List.empty
+  }
 
 }
 

@@ -3,5 +3,6 @@
 package com.acme
 
 object F@foo@oo {
-  bar(a@input_a@: String): Int = ???
+  bar(a@input_a@: String): Int = 2
+
 }

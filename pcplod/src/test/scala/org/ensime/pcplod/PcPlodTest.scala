@@ -11,23 +11,20 @@ class PcPlodTest extends FlatSpec {
     mr.symbolAtPoint('foo) shouldBe Some("com.acme.Foo")
     mr.typeAtPoint('foo) shouldBe Some("com.acme.Foo.type")
 
-    // Right now this does not return the param name, it returns the type of the param.
-    // this is the wrong assertion
-    mr.symbolAtPoint('input_a) shouldBe Some("com.acme.Foo.bar")
-    mr.typeAtPoint('input_a) shouldBe Some("String")
+    mr.symbolAtPoint('bar) shouldBe Some("com.acme.Foo.bar")
+    mr.typeAtPoint('bar) shouldBe Some("Int")
 
-//    mr.messages shouldBe 'empty
+    mr.symbolAtPoint('a) shouldBe Some("com.acme.Foo.a")
+    mr.typeAtPoint('a) shouldBe Some("Int")
+
+    mr.messages shouldBe 'empty
   }
 
   "Mr Plod" should "typecheck an uncompilable valid noddy file" in withMrPlod("/com/acme/foo_bad.scala") { mr =>
-    // not entirely sure what the PC would do here...
     mr.typeAtPoint('foo) shouldBe Some("com.acme.Foo.type")
-//    mr.typeAtPoint('foo) shouldBe None
 
-    // returns Some("notype>")
-    mr.typeAtPoint('input_a) shouldBe None
-//    mr.typeAtPoint('foo) shouldBe None
-
+    mr.typeAtPoint('input_a) shouldBe Some("<error>")
+    println(mr.messages)
     mr.messages should contain only ()
   }
 
