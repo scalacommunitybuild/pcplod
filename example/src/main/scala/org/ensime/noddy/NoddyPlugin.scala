@@ -4,6 +4,7 @@ package org.ensime.noddy
 
 import scala.collection.breakOut
 import scala.reflect.internal.ModifierFlags
+import scala.reflect.internal.util._
 import scala.tools.nsc._
 import scala.tools.nsc.plugins._
 import scala.tools.nsc.transform._
@@ -33,6 +34,14 @@ trait WithPos {
     /** withAnnotations appears to be broken */
     def copyWithAnns(anns: List[global.Tree]): global.Modifiers =
       t.copy(annotations = anns).setPositions(t.positions)
+  }
+
+  implicit class RichTree[T <: global.Tree](t: T) {
+    /** when generating a tree, use this to generate positions all the way down. */
+    def withAllPos(pos: Position): T = {
+      t.foreach(_.setPos(new TransparentPosition(pos.source, pos.start, pos.end, pos.end)))
+      t
+    }
   }
 }
 
@@ -154,8 +163,7 @@ class NoddyPlugin(override val global: Global) extends Plugin {
 
     /** adds a log method to a class */
     def updateClass(clazz: ClassDef): ClassDef = {
-      val log = genLog
-      log.setPos(clazz.pos)
+      val log = genLog.withAllPos(clazz.pos)
       val impl = addMethods(clazz.impl, log :: Nil)
       treeCopy.ClassDef(clazz, clazz.mods, clazz.name, clazz.tparams, impl)
     }
@@ -188,11 +196,9 @@ class NoddyPlugin(override val global: Global) extends Plugin {
             else AppliedTypeTree(Ident(tpe), clazz.tparams.map { t => Ident(t.name) }),
             // PC plugins don't need implementations
             Literal(Constant(null))
-          )
-          apply.setPos(pos)
+          ).withAllPos(pos)
 
-          val log = genLog
-          log.setPos(pos)
+          val log = genLog.withAllPos(pos)
 
           val properties = ps.flatMap {
             vs =>
@@ -252,7 +258,7 @@ class NoddyPlugin(override val global: Global) extends Plugin {
 
         val updated = t.stats.flatMap {
           case ClassNoCompanion(c) if c.mods.hasAnnotationNamed(Noddy) =>
-            val companion = updateCompanion(c, genCompanion(c))
+            val companion = updateCompanion(c, genCompanion(c)).withAllPos(c.pos)
             List(updateClass(c), companion)
 
           case ClassHasCompanion(c) if c.mods.hasAnnotationNamed(Noddy) =>

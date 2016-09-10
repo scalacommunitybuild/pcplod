@@ -9,7 +9,7 @@ import scala.concurrent.Future
 class M@me@e
 
 @noddy
-class My@myself@self(val foo: St@foo@ring, val bar: Long)
+class My@myself@self(val fo@foo@o: String, val bar: Long)
 
 class Irene
 
@@ -49,3 +49,4 @@ object LoggingFutures {
   def a: Future[String] = null
   def b: Future[Long] = null
 }
+

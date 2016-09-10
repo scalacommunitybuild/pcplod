@@ -2,7 +2,7 @@
 // License: http://www.apache.org/licenses/LICENSE-2.0
 package org.ensime.pcplod
 
-import scala.reflect.internal.util.{BatchSourceFile, OffsetPosition}
+import scala.reflect.internal.util.{BatchSourceFile, OffsetPosition, Position}
 import scala.tools.nsc.Settings
 import scala.tools.nsc.interactive.Global
 import scala.tools.nsc.reporters.{Reporter, StoreReporter}
@@ -21,7 +21,13 @@ private[pcplod] object PoshPresentationCompiler {
       case None =>
     }
 
-    val reporter = new StoreReporter()
+    //val reporter = new StoreReporter()
+    val reporter: StoreReporter = new StoreReporter {
+      protected override def info0(pos: Position, msg: String, severity: Severity, force: Boolean): Unit = {
+        println(s"$pos, $msg, $severity")
+        super.info0(pos, msg, severity, force)
+      }
+    }
 
     (new PoshPresentationCompiler(settings, reporter), reporter)
   }

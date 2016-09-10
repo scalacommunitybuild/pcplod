@@ -142,11 +142,17 @@ class MrPlod(
   val res: String,
   val pc: PcPlod
 ) {
-  pc.loadScala(res)
+  // lazy init means tests will fail in the user's code, not in framework code
+  var initialised = false
 
-  def symbolAtPoint(p: Point): Option[String] = pc.symbolAtPoint(res, p)
+  private def init(): Unit = if (!initialised) {
+    initialised = true
+    pc.loadScala(res)
+  }
 
-  def typeAtPoint(p: Point): Option[String] = pc.typeAtPoint(res, p)
+  def symbolAtPoint(p: Point): Option[String] = { init(); pc.symbolAtPoint(res, p) }
 
-  def messages: List[PcMessage] = pc.messages
+  def typeAtPoint(p: Point): Option[String] = { init(); pc.typeAtPoint(res, p) }
+
+  def messages: List[PcMessage] = { init(); pc.messages }
 }
