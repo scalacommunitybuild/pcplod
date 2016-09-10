@@ -7,6 +7,15 @@ import Matchers._
 
 class PcPlodTest extends FlatSpec {
 
+  "Mr Plod" should "give a sensible warning if you point at a missing file" in {
+    val caught = intercept[IllegalArgumentException] {
+      withMrPlod("/com/acme/missing.scala") { mr =>
+      }
+    }
+    caught.getMessage shouldBe "Scala file /com/acme/missing.scala not found as resource"
+  }
+
+
   "Mr Plod" should "typecheck a compilable valid noddy file" in withMrPlod("/com/acme/foo.scala") { mr =>
     mr.symbolAtPoint('foo) shouldBe Some("com.acme.Foo")
     mr.typeAtPoint('foo) shouldBe Some("com.acme.Foo.type")

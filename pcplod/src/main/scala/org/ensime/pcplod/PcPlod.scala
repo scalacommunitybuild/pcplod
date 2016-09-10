@@ -51,6 +51,8 @@ class PcPlod(optPluginJar: Option[String]) {
    */
   def loadScala(res: String): Unit = {
     val stream: InputStream = getClass.getResourceAsStream(res)
+    if(stream == null)
+      throw new IllegalArgumentException(s"Scala file $res not found as resource")
     val rawInputStream = scala.io.Source.fromInputStream(stream)
 
     val rawContents = try {
@@ -89,20 +91,7 @@ class PcPlod(optPluginJar: Option[String]) {
     // retrieve and use the FileInfo for the loaded file.
     files.get(res) match {
       case Some(fi) =>
-        val idx: Int = p match {
-          case NoddyPoint(symbol) =>
-            val rawName = symbol.name
-            fi.tokenLocations.get(rawName) match {
-              case Some(filePos) =>
-                filePos
-              case None =>
-                throw new IllegalArgumentException(s"Token $symbol not found in $res")
-            }
-          case PositionPoint(filePos) =>
-            filePos
-          case LineColumnPoint(line, col) =>
-            ???
-        }
+        val idx = positionOffsetGivenPoint(res, fi, p)
         pc.askSymbolInfoAt(fi.f, idx)
       case None =>
         throw new IllegalArgumentException(s"res $res not loaded in PC")
@@ -113,23 +102,27 @@ class PcPlod(optPluginJar: Option[String]) {
     // retrieve and use the FileInfo for the loaded file.
     files.get(res) match {
       case Some(fi) =>
-        val idx: Int = p match {
-          case NoddyPoint(symbol) =>
-            val rawName = symbol.name
-            fi.tokenLocations.get(rawName) match {
-              case Some(filePos) =>
-                filePos
-              case None =>
-                throw new IllegalArgumentException(s"Token $symbol not found in $res")
-            }
-          case PositionPoint(filePos) =>
-            filePos
-          case LineColumnPoint(line, col) =>
-            ???
-        }
+        val idx = positionOffsetGivenPoint(res, fi, p)
         pc.askTypeAt(fi.f, idx)
       case None =>
         throw new IllegalArgumentException(s"res $res not loaded in PC")
+    }
+  }
+
+  def positionOffsetGivenPoint(res: String, fi: FileInfo, p: Point): Int = {
+    p match {
+      case NoddyPoint(symbol) =>
+        val rawName = symbol.name
+        fi.tokenLocations.get(rawName) match {
+          case Some(filePos) =>
+            filePos
+          case None =>
+            throw new IllegalArgumentException(s"Token $symbol not found in $res")
+        }
+      case PositionPoint(filePos) =>
+        filePos
+      case LineColumnPoint(line, col) =>
+        PCPlodUtil.calcPosForLineCol(res,line,col)
     }
   }
 
