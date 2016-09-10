@@ -7,7 +7,6 @@ case class PositionPoint(p: Int) extends Point
 case class LineColumnPoint(line: Int, column: Int) extends Point
 case class NoddyPoint(name: Symbol) extends Point
 
-
 sealed abstract class PcMessageSeverity
 
 object PcMessageSeverity {

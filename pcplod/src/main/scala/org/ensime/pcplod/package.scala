@@ -4,9 +4,10 @@ package org.ensime
 
 package object pcplod {
 
-  def withPcPlod[T](classpath: String)(f: PcPlod => T): T = {
-    f(PcPlod(classpath))
+  def withPcPlod[T](pluginJar: String)(f: PcPlod => T): T = {
+    f(PcPlod(Some(pluginJar)))
   }
+
   def withPcPlod[T](f: PcPlod => T): T = {
     f(PcPlod())
   }

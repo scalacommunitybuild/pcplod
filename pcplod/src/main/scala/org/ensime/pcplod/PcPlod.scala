@@ -4,39 +4,45 @@ package org.ensime.pcplod
 
 import java.io.InputStream
 
-import org.ensime.pcplod.PcPlod.CompilerInfo
-import org.ensime.pcplod.internal.RichishPresentationCompiler
-
+import scala.annotation.tailrec
 import scala.reflect.internal.util.BatchSourceFile
 
 object PcPlod {
-  def apply(classpath: String): PcPlod = {
-    new PcPlod(classpath, "/Users/rorygraves/.coursier/cache/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.jar")
-  }
-
   def apply(): PcPlod = {
-    apply("")
+    //    -Dpcplod.pluginjar=/workspace/scala-compiler-plugin/plugins/target/scala-2.11/plugins_2.11-1.0.0-SNAPSHOT.jar
+
+    val pluginJarURL = Option(System.getProperty("pcplod.pluginjar"))
+    new PcPlod(pluginJarURL)
   }
 
-  case class CompilerInfo(file: String)
+  def apply(optPluginJar: Option[String]): PcPlod = {
+    new PcPlod(optPluginJar)
+  }
 }
 
-class PcPlod(classpath: String, scalaLibrary: String) {
+class PcPlod(optPluginJar: Option[String]) {
 
   case class FileInfo(path: String, contents: String, tokenLocations: Map[String, Int], f: BatchSourceFile)
 
   private var files: Map[String, FileInfo] = Map.empty
-  val (pc, reporter) = RichishPresentationCompiler.create(scalaLibrary, classpath)
+  val (pc, reporter) = PoshPresentationCompiler.create(optPluginJar)
 
   /**
    * Load a Scala file into the PC - the file is a resource location
    * N.b. the file contains tags (surrounded by @, to denote interesting locations in the code, these are stripped out
    * here.
+   *
    * @param res A resource file containing the contents
    */
   def loadScala(res: String): Unit = {
     val stream: InputStream = getClass.getResourceAsStream(res)
-    val rawContents = scala.io.Source.fromInputStream(stream).getLines.mkString("\n")
+    val rawInputStream = scala.io.Source.fromInputStream(stream)
+
+    val rawContents = try {
+      rawInputStream.getLines.mkString("\n")
+    } finally {
+      rawInputStream.close()
+    }
     val (contents, symbols) = parseFile(rawContents)
     val f = pc.loadFile(res, contents)
     val fileInfo = FileInfo(res, contents, symbols, f)
@@ -44,22 +50,24 @@ class PcPlod(classpath: String, scalaLibrary: String) {
   }
 
   def compilerWarnings: List[PcMessage] = {
-    reporter.infos.toList.map { info =>
-        val severity = info.severity match {
-          case `reporter`.INFO =>
-            PcMessageSeverity.Info
-          case `reporter`.WARNING =>
-            PcMessageSeverity.Warning
-          case `reporter`.ERROR =>
-            PcMessageSeverity.Error
-        }
-        PcMessage(info.pos.source.file.toString, severity, info.msg)
-    }
+    import reporter.{INFO, WARNING, ERROR}
+
+    reporter.infos.map { info =>
+      val severity = info.severity match {
+        case INFO =>
+          PcMessageSeverity.Info
+        case WARNING =>
+          PcMessageSeverity.Warning
+        case ERROR =>
+          PcMessageSeverity.Error
+      }
+      PcMessage(info.pos.source.file.toString, severity, info.msg)
+    }(collection.breakOut)
   }
+
   val TokenRegex = "(?s)^([^@]*)@([^@]+)@(.*)$".r
 
   def parseFile(rawContents: String): (String, Map[String, Int]) = {
-    import scala.annotation.tailrec
     @tailrec
     def extractSymbols(contents: String, symbols: Map[String, Int]): (String, Map[String, Int]) = {
       contents match {
@@ -144,6 +152,8 @@ class MrPlod(
   pc.loadScala(res)
 
   def symbolAtPoint(p: Point): Option[String] = pc.symbolAtPoint(res, p)
+
   def typeAtPoint(p: Point): Option[String] = pc.typeAtPoint(res, p)
+
   def messages: List[PcMessage] = pc.messages
 }

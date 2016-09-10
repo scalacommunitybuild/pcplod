@@ -27,9 +27,11 @@ class PcPlodTest extends FlatSpec {
     println(mr.messages)
 
     import org.ensime.pcplod.PcMessageSeverity._
-    val expected = List(PcMessage("/com/acme/foo_bad.scala",Error,"';' expected but '=' found."),
-      PcMessage("/com/acme/foo_bad.scala",Error, "not found: value bar"),
-      PcMessage("/com/acme/foo_bad.scala",Error,"not found: value a"))
+    val expected = List(
+      PcMessage("/com/acme/foo_bad.scala", Error, "';' expected but '=' found."),
+      PcMessage("/com/acme/foo_bad.scala", Error, "not found: value bar"),
+      PcMessage("/com/acme/foo_bad.scala", Error, "not found: value a")
+    )
 
     mr.messages shouldBe expected
   }

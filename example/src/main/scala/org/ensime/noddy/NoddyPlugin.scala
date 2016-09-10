@@ -110,7 +110,7 @@ class NoddyPlugin(override val global: Global) extends Plugin {
       clazz.name.companionName,
       Template(
         List(Select(Ident(nme.scala_), nme.AnyRef.toTypeName)),
-        emptyValDef,
+        noSelfType,
         List(
           DefDef(
             Modifiers(),
@@ -181,7 +181,7 @@ class NoddyPlugin(override val global: Global) extends Plugin {
             newTermName("apply"),
             clazz.tparams.map(stripVariance),
             ps.map(_.map { v =>
-              val mods = (v.mods &~ ModifierFlags.PARAMACCESSOR)
+              val mods = v.mods &~ ModifierFlags.PARAMACCESSOR
               treeCopy.ValDef(v, mods, v.name, v.tpt.duplicate, v.rhs)
             }),
             if (clazz.tparams.isEmpty) Ident(tpe)
@@ -261,8 +261,8 @@ class NoddyPlugin(override val global: Global) extends Plugin {
           case CompanionAndClass(companion, c) if c.mods.hasAnnotationNamed(Noddy) =>
             List(updateCompanion(c, companion))
 
-          case t =>
-            List(t)
+          case tr =>
+            List(tr)
         }
 
         treeCopy.PackageDef(t, t.pid, updated)
