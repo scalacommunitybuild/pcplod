@@ -3,8 +3,8 @@
 package org.ensime.pcplod
 
 import java.io.InputStream
+import java.util.regex.Pattern
 
-import scala.annotation.tailrec
 import scala.reflect.internal.util.BatchSourceFile
 
 object PcPlod {
@@ -12,6 +12,26 @@ object PcPlod {
 
   def apply(optPluginJar: Option[String]): PcPlod = {
     new PcPlod(optPluginJar)
+  }
+
+  private val TokenPattern = Pattern.compile("@([a-zA-Z0-9_]+)@")
+  // returns the cleaned file and the map of symbol names to locations
+  def parseNoddy(contents: String): (String, Map[String, Int]) = {
+    val matcher = TokenPattern.matcher(contents)
+
+    var cleaned = new java.lang.StringBuilder // iteratively cleaned up contents
+    var tracked = 0 // where in the contents the cleaned has parsed to
+
+    var symbols = Map.empty[String, Int]
+
+    while (matcher.find()) {
+      cleaned.append(contents.substring(tracked, matcher.start))
+      tracked = matcher.end
+      symbols += matcher.group(1) -> (cleaned.length - 1)
+    }
+    cleaned.append(contents.substring(tracked))
+
+    (cleaned.toString, symbols)
   }
 }
 
@@ -38,7 +58,7 @@ class PcPlod(optPluginJar: Option[String]) {
     } finally {
       rawInputStream.close()
     }
-    val (contents, symbols) = parseFile(rawContents)
+    val (contents, symbols) = PcPlod.parseNoddy(rawContents)
     val f = pc.loadFile(res, contents)
     val fileInfo = FileInfo(res, contents, symbols, f)
     files += res -> fileInfo
@@ -58,21 +78,6 @@ class PcPlod(optPluginJar: Option[String]) {
       }
       PcMessage(info.pos.source.file.toString, severity, info.msg)
     }(collection.breakOut)
-  }
-
-  val TokenRegex = "(?s)^([^@]*)@([^@]+)@(.*)$".r
-
-  def parseFile(rawContents: String): (String, Map[String, Int]) = {
-    @tailrec
-    def extractSymbols(contents: String, symbols: Map[String, Int]): (String, Map[String, Int]) = {
-      contents match {
-        case TokenRegex(prequel, tag, sequel) =>
-          extractSymbols(prequel + sequel, symbols + (tag -> prequel.length))
-        case _ =>
-          (contents, symbols)
-      }
-    }
-    extractSymbols(rawContents, Map.empty)
   }
 
   def unloadScala(res: String): Unit = {

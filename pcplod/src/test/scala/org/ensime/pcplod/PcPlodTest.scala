@@ -36,4 +36,10 @@ class PcPlodTest extends FlatSpec {
     mr.messages shouldBe expected
   }
 
+  "Noddy parser" should "support noddy syntax" in {
+    val raw = "def ba@bar@r(a@a@: Int): Int = 2"
+    val clean = "def bar(a: Int): Int = 2"
+
+    PcPlod.parseNoddy(raw) shouldBe ((clean, Map("bar" -> 5, "a" -> 8)))
+  }
 }
