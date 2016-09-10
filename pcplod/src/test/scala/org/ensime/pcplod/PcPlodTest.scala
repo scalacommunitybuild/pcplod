@@ -4,8 +4,16 @@ package org.ensime.pcplod
 
 import org.scalatest._
 import Matchers._
+import org.slf4j.LoggerFactory
+import org.slf4j.bridge.SLF4JBridgeHandler
 
-class PcPlodTest extends FlatSpec {
+trait Logging {
+  SLF4JBridgeHandler.removeHandlersForRootLogger()
+  SLF4JBridgeHandler.install()
+  val log = LoggerFactory.getLogger(this.getClass)
+}
+
+class PcPlodTest extends FlatSpec with Logging {
 
   "Mr Plod" should "give a sensible warning if you point at a missing file" in {
     val caught = intercept[IllegalArgumentException] {
@@ -32,7 +40,6 @@ class PcPlodTest extends FlatSpec {
     mr.typeAtPoint('foo) shouldBe Some("com.acme.Foo.type")
 
     mr.typeAtPoint('input_a) shouldBe Some("<error>")
-    println(mr.messages)
 
     import org.ensime.pcplod.PcMessageSeverity._
     val expected = List(

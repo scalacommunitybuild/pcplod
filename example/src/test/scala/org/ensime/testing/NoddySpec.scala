@@ -4,11 +4,20 @@
 // intentionally not in org.ensime.noddy for testing
 package org.ensime.testing
 
+import org.slf4j.LoggerFactory
+import org.slf4j.bridge.SLF4JBridgeHandler
 import scala.concurrent.Future
 import org.scalatest._
 import org.scalatest.Matchers._
 
-class NoddySpec extends FlatSpec {
+trait Logging {
+  SLF4JBridgeHandler.removeHandlersForRootLogger()
+  SLF4JBridgeHandler.install()
+  val log = LoggerFactory.getLogger(this.getClass)
+}
+
+class NoddySpec extends FlatSpec with Logging {
+
   "@noddy" should "generate companion's apply with no parameters" in {
     { Me(): Me } shouldBe null
   }

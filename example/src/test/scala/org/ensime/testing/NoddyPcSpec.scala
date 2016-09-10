@@ -8,8 +8,10 @@ import org.scalatest._
 import org.scalatest.Matchers._
 
 import org.ensime.pcplod._
+import org.ensime.testing.Logging
 
-class NoddyPcSpec extends FlatSpec {
+class NoddyPcSpec extends FlatSpec with Logging {
+
   "@noddy" should "handle definitions of @noddy" in withMrPlod("/classes.scala") { mr: MrPlod =>
     mr.messages shouldBe Nil
 
@@ -22,4 +24,5 @@ class NoddyPcSpec extends FlatSpec {
     mr.symbolAtPoint('foo) shouldBe Some("org.ensime.pctesting.Myself.foo")
     mr.typeAtPoint('foo) shouldBe Some("String")
   }
+
 }

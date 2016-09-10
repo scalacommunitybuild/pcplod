@@ -17,14 +17,14 @@ private[pcplod] trait PoshCompilerControl extends CompilerControl {
       case fi: FailedInterrupt =>
         fi.getCause match {
           case e: InterruptedException =>
-            println("interrupted exception in askOption:" + e)
+            debugLog("interrupted exception in askOption:" + e)
             None
           case e =>
-            println("Error during askOption:" + e)
+            debugLog("Error during askOption:" + e)
             None
         }
       case e: Throwable =>
-        println("Error during askOption:" + e)
+        debugLog("Error during askOption:" + e)
         None
     }
   }

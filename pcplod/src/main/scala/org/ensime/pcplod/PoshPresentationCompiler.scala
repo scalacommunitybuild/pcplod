@@ -2,18 +2,22 @@
 // License: http://www.apache.org/licenses/LICENSE-2.0
 package org.ensime.pcplod
 
+import java.util.logging.Logger
+import java.util.logging.Level._
 import scala.reflect.internal.util.{BatchSourceFile, OffsetPosition, Position}
 import scala.tools.nsc.Settings
 import scala.tools.nsc.interactive.Global
 import scala.tools.nsc.reporters.{Reporter, StoreReporter}
 
 private[pcplod] object PoshPresentationCompiler {
-  def create(pluginJarPathOpt: Option[String]): (PoshPresentationCompiler, StoreReporter) = {
+  private val log = Logger.getLogger(this.getClass.getName)
 
-    val settings = new Settings(s => println(s"PC: $s"))
-    settings.YpresentationDebug.value = true
-    settings.YpresentationVerbose.value = true
-    settings.verbose.value = true
+  def create(pluginJarPathOpt: Option[String]): (PoshPresentationCompiler, StoreReporter) = {
+    val settings = new Settings(log.severe)
+    settings.YpresentationDebug.value = log.isLoggable(FINE)
+    settings.YpresentationVerbose.value = log.isLoggable(FINER)
+    settings.verbose.value = log.isLoggable(FINER)
+
     settings.usejavacp.value = true
     pluginJarPathOpt match {
       case Some(jarPath) =>
@@ -21,10 +25,13 @@ private[pcplod] object PoshPresentationCompiler {
       case None =>
     }
 
-    //val reporter = new StoreReporter()
     val reporter: StoreReporter = new StoreReporter {
       protected override def info0(pos: Position, msg: String, severity: Severity, force: Boolean): Unit = {
-        println(s"$pos, $msg, $severity")
+        severity match {
+          case INFO    => log.info(s"$pos: $msg")
+          case WARNING => log.warning(s"$pos: $msg")
+          case ERROR   => log.severe(s"$pos: $msg")
+        }
         super.info0(pos, msg, severity, force)
       }
     }
@@ -91,12 +98,12 @@ private[pcplod] class PoshPresentationCompiler(
         case Annotated(atp, _) =>
           List(atp.symbol)
         case st: SymTree if st.symbol ne null =>
-          println("DEBUG: using symbol of " + tree.getClass + " tree")
+          debugLog("DEBUG: using symbol of " + tree.getClass + " tree")
           List(tree.symbol)
         case lit: Literal =>
           List(lit.tpe.typeSymbol)
         case _ =>
-          println("WARN symbolAt for " + tree.getClass + ": " + tree)
+          debugLog("WARN symbolAt for " + tree.getClass + ": " + tree)
           Nil
       }
     wannabes.find(_.exists)

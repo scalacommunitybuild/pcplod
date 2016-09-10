@@ -12,7 +12,10 @@ object ProjectPlugin extends SensiblePlugin {
     version := "1.0.0-SNAPSHOT",
     HeaderKey.headers := Copyright.ApacheMap,
     ScalariformKeys.preferences := FormattingPreferences().setPreference(AlignSingleLineCaseStatements, true),
-    libraryDependencies ++= Sensible.testLibs()
+    libraryDependencies ++= Sensible.testLibs(),
+    javaOptions in Test ++= Seq(
+      "-Dlogback.configurationFile=../logback-test.xml"
+    )
   ) ++ Sensible.settings ++ SonatypeSupport.sonatype("ensime", "pcplod", SonatypeSupport.Apache2)
 
 }
