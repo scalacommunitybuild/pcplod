@@ -51,7 +51,7 @@ class PcPlod(optPluginJar: Option[String]) {
    */
   def loadScala(res: String): Unit = {
     val stream: InputStream = getClass.getResourceAsStream(res)
-    if(stream == null)
+    if (stream == null)
       throw new IllegalArgumentException(s"Scala file $res not found as resource")
     val rawInputStream = scala.io.Source.fromInputStream(stream)
 
@@ -122,7 +122,7 @@ class PcPlod(optPluginJar: Option[String]) {
       case PositionPoint(filePos) =>
         filePos
       case LineColumnPoint(line, col) =>
-        PCPlodUtil.calcPosForLineCol(res,line,col)
+        PCPlodUtil.calcPosForLineCol(res, line, col)
     }
   }
 

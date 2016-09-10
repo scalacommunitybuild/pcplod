@@ -11,7 +11,7 @@ object PCPlodUtil {
       if (line > lines.size)
         file.length
       else {
-        lines.take(line).map(_.length+1).sum + col
+        lines.take(line).map(_.length + 1).sum + col
       }
     }
   }

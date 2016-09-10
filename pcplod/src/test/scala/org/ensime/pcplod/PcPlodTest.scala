@@ -15,7 +15,6 @@ class PcPlodTest extends FlatSpec {
     caught.getMessage shouldBe "Scala file /com/acme/missing.scala not found as resource"
   }
 
-
   "Mr Plod" should "typecheck a compilable valid noddy file" in withMrPlod("/com/acme/foo.scala") { mr =>
     mr.symbolAtPoint('foo) shouldBe Some("com.acme.Foo")
     mr.typeAtPoint('foo) shouldBe Some("com.acme.Foo.type")
