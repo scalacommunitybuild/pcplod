@@ -8,12 +8,7 @@ import scala.annotation.tailrec
 import scala.reflect.internal.util.BatchSourceFile
 
 object PcPlod {
-  def apply(): PcPlod = {
-    //    -Dpcplod.pluginjar=/workspace/scala-compiler-plugin/plugins/target/scala-2.11/plugins_2.11-1.0.0-SNAPSHOT.jar
-
-    val pluginJarURL = Option(System.getProperty("pcplod.pluginjar"))
-    new PcPlod(pluginJarURL)
-  }
+  def apply(): PcPlod = new PcPlod(sys.props.get("pcplod.plugin"))
 
   def apply(optPluginJar: Option[String]): PcPlod = {
     new PcPlod(optPluginJar)

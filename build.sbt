@@ -13,8 +13,9 @@ lazy val example = project.dependsOn(pcplod % "test").settings(
     "org.scala-lang" % "scala-compiler" % scalaVersion.value,
     "org.scala-lang" % "scala-reflect" % scalaVersion.value
   ),
-  scalacOptions in Test <++= (packageBin in Compile) map { jar =>
-    // needs timestamp to force recompile
-    Seq("-Xplugin:" + jar.getAbsolutePath, "-Jdummy=" + jar.lastModified)
-  }
+  scalacOptions in Test ++= {
+    val jar = (packageBin in Compile).value
+    Seq(s"-Xplugin:${jar.getAbsolutePath}", s"-Jdummy=${jar.lastModified}") // ensures recompile
+  },
+  javaOptions in Test += s"-Dpcplod.plugin=${(packageBin in Compile).value.getAbsolutePath}"
 )

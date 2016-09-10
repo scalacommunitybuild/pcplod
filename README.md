@@ -19,16 +19,16 @@ dependencyOverrides += "org.scala-lang" % "scala-compiler" % scalaVersion.value
 If you are testing a compiler plugin you may already be aware that you must add something like the following to your test configuration
 
 ```scala
-scalacOptions in Test <++= (packageBin in Compile) map { jar =>
-  // needs timestamp to force recompile
-  Seq("-Xplugin:" + jar.getAbsolutePath, "-Jdummy=" + jar.lastModified)
+scalacOptions in Test ++= {
+  val jar = (packageBin in Compile).value
+  Seq(s"-Xplugin:${jar.getAbsolutePath}", s"-Jdummy=${jar.lastModified}") // ensures recompile
 }
 ```
 
 But to ensure that the plugin is used by pcplod, you must also add
 
 ```scala
-???
+javaOptions in Test += s"-Dpcplod.plugin=${(packageBin in Compile).value.getAbsolutePath}"
 ```
 
 ## How to use it
@@ -91,11 +91,11 @@ in this case, the symbol `'foo` will refer to the letter `F` of `Foo` and the sy
 
 ## Customisation
 
-By default, PC Plod will make everything that is on the test's classpath available for use in the presentation compiler. However, you may wish to provide a custom classpath, which can be provided to `withPcPlod` as a parameter (not available for `withMrPlod`). It is recommended to use sbt to generate the classpath and inject it into the test environment as a property.
+By default, PC Plod will make everything that is on the test's classpath available for use in the presentation compiler. However, you may wish to provide a custom jar, which can be provided to `withPcPlod` as a parameter (not available for `withMrPlod`). It is recommended to use sbt to generate the jar and inject it into the test environment as a property.
 
 ```scala
-val classpath = sys.props("pcplod.test1.cp")
-withPcPlod(classpath) { pc =>
+val jar = sys.props("pcplod.test1.jar")
+withPcPlod(jar) { pc =>
   pc.loadScala("path/to/package/foo.scala")
   // your tests here
   pc.loadScala("path/to/package/bar.scala")
@@ -104,30 +104,17 @@ withPcPlod(classpath) { pc =>
 }
 ```
 
-using an sbt configuration such as ???
-
 ## Example ENSIME Integration
 
-To add the example compiler plugin example to ENSIME, automatically compiling the plugin first, add this file to your local clone of the repository in `project/EnsimeProjectSettings.scala` (this could also be adapted to work as a `local.sbt`)
+To add the example compiler plugin example to ENSIME, automatically compiling the plugin first, add this file to your local clone of the repository in `ensime.sbt`
 
 ```scala
-import sbt._
-import Keys._
-import org.ensime.Imports.EnsimeKeys._
 import org.ensime.CommandSupport._
 
-object EnsimeProjectSettings extends AutoPlugin {
-  override def requires = org.ensime.EnsimePlugin
-  override def trigger = allRequirements
-
-  override def projectSettings = Seq(
-    ensimeCompilerArgs <+= state.map { implicit s =>
-      // ensures the jar is built first
-      implicit val structure = Project.extract(s).structure
-      implicit val plugin = structure.allProjectRefs.find(_.project == "example").get
-      val jar = (packageBin in plugin in Compile).run
-      s"-Xplugin:${jar.getCanonicalPath}"
-    }
-  )
+EnsimeKeys.ensimeCompilerArgs <+= state.map { implicit s =>
+  implicit val structure = Project.extract(s).structure
+  implicit val plugin = structure.allProjectRefs.find(_.project == "example").get
+  val jar = (packageBin in plugin in Compile).run
+  s"-Xplugin:${jar.getCanonicalPath}"
 }
 ```
