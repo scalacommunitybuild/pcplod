@@ -2,8 +2,6 @@
 
 ## Installation
 
-**WARNING** this library has not been written yet.
-
 Published as a regular artefact, the sbt installation is easy:
 
 ```scala
