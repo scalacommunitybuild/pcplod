@@ -17,14 +17,14 @@ class PcPlodTest extends FlatSpec with Logging {
 
   "Mr Plod" should "give a sensible warning if you point at a missing file" in {
     val caught = intercept[IllegalArgumentException] {
-      withMrPlod("/com/acme/missing.scala") { mr =>
+      withMrPlod("com/acme/missing.scala") { mr =>
         mr.typeAtPoint(0)
       }
     }
-    caught.getMessage shouldBe "Scala file /com/acme/missing.scala not found as resource"
+    caught.getMessage shouldBe "requirement failed: Scala file com/acme/missing.scala not found as resource"
   }
 
-  "Mr Plod" should "typecheck a compilable valid noddy file" in withMrPlod("/com/acme/foo.scala") { mr =>
+  "Mr Plod" should "typecheck a compilable valid noddy file" in withMrPlod("com/acme/foo.scala") { mr =>
     mr.symbolAtPoint('foo) shouldBe Some("com.acme.Foo")
     mr.typeAtPoint('foo) shouldBe Some("com.acme.Foo.type")
 
@@ -37,16 +37,16 @@ class PcPlodTest extends FlatSpec with Logging {
     mr.messages shouldBe empty
   }
 
-  "Mr Plod" should "typecheck an uncompilable valid noddy file" in withMrPlod("/com/acme/foo_bad.scala") { mr =>
+  "Mr Plod" should "typecheck an uncompilable valid noddy file" in withMrPlod("com/acme/foo_bad.scala") { mr =>
     mr.typeAtPoint('foo) shouldBe Some("com.acme.Foo.type")
 
     mr.typeAtPoint('input_a) shouldBe Some("<error>")
 
     import org.ensime.pcplod.PcMessageSeverity._
     val expected = List(
-      PcMessage("/com/acme/foo_bad.scala", Error, "';' expected but '=' found."),
-      PcMessage("/com/acme/foo_bad.scala", Error, "not found: value bar"),
-      PcMessage("/com/acme/foo_bad.scala", Error, "not found: value a")
+      PcMessage("com/acme/foo_bad.scala", Error, "';' expected but '=' found."),
+      PcMessage("com/acme/foo_bad.scala", Error, "not found: value bar"),
+      PcMessage("com/acme/foo_bad.scala", Error, "not found: value a")
     )
 
     mr.messages shouldBe expected

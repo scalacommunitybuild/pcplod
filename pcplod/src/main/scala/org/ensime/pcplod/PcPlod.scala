@@ -50,7 +50,8 @@ class PcPlod(optPluginJar: Option[String]) {
    * @param res A resource file containing the contents
    */
   def loadScala(res: String): Unit = {
-    val stream: InputStream = getClass.getResourceAsStream(res)
+    val path = if (res.startsWith("/")) res else s"/$res"
+    val stream: InputStream = getClass.getResourceAsStream(path)
     require(stream != null, s"Scala file $res not found as resource")
     val rawInputStream = scala.io.Source.fromInputStream(stream)
 

@@ -12,7 +12,7 @@ import org.ensime.testing.Logging
 
 class NoddyPcSpec extends FlatSpec with Logging {
 
-  "@noddy" should "handle definitions of @noddy" in withMrPlod("/classes.scala") { mr: MrPlod =>
+  "@noddy" should "handle definitions of @noddy" in withMrPlod("classes.scala") { mr: MrPlod =>
     mr.messages shouldBe Nil
 
     mr.symbolAtPoint('me) shouldBe Some("org.ensime.pctesting.Me")
