@@ -18,6 +18,7 @@ class PcPlodTest extends FlatSpec with Logging {
   "Mr Plod" should "give a sensible warning if you point at a missing file" in {
     val caught = intercept[IllegalArgumentException] {
       withMrPlod("/com/acme/missing.scala") { mr =>
+        mr.typeAtPoint(0)
       }
     }
     caught.getMessage shouldBe "Scala file /com/acme/missing.scala not found as resource"

@@ -1,5 +1,5 @@
-// Copyright (C) 2016 Sam Halliday
-// License: http://www.gnu.org/licenses/gpl.html
+// Copyright: 2010 - 2016 Rory Graves, Sam Halliday
+// License: http://www.apache.org/licenses/LICENSE-2.0
 package org.ensime.annotation
 
 import scala.annotation.StaticAnnotation

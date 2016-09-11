@@ -51,8 +51,7 @@ class PcPlod(optPluginJar: Option[String]) {
    */
   def loadScala(res: String): Unit = {
     val stream: InputStream = getClass.getResourceAsStream(res)
-    if (stream == null)
-      throw new IllegalArgumentException(s"Scala file $res not found as resource")
+    require(stream != null, s"Scala file $res not found as resource")
     val rawInputStream = scala.io.Source.fromInputStream(stream)
 
     val rawContents = try {
