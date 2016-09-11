@@ -26,7 +26,7 @@ object Sensible {
 
     scalacOptions in Compile ++= Seq(
       "-encoding", "UTF-8",
-      "-target:jvm-1.7",
+      "-target:jvm-1.6",
       "-feature",
       "-deprecation",
       "-language:postfixOps",
@@ -40,10 +40,6 @@ object Sensible {
       "-Xfuture"
     ) ++ {
         if (scalaVersion.value.startsWith("2.11")) Seq("-Ywarn-unused-import")
-        else Nil
-      } ++ {
-        // fatal warnings can get in the way during the DEV cycle
-        if (sys.env.contains("CI")) Seq("-Xfatal-warnings")
         else Nil
       },
     javacOptions in (Compile, compile) ++= Seq(

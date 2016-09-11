@@ -26,7 +26,7 @@ import scala.tools.nsc.transform._
  *
  * http://docs.scala-lang.org/overviews/reflection/symbols-trees-types#trees
  */
-trait WithPos {
+trait WithPos { this: BackCompat =>
   val global: Global
 
   // Modifiers is an inner class, oh joy
@@ -39,7 +39,7 @@ trait WithPos {
   implicit class RichTree[T <: global.Tree](t: T) {
     /** when generating a tree, use this to generate positions all the way down. */
     def withAllPos(pos: Position): T = {
-      t.foreach(_.setPos(new TransparentPosition(pos.source, pos.start, pos.end, pos.end)))
+      t.foreach(_.setPos(new TransparentPosition(pos.source, pos.startOrCursor, pos.endOrCursor, pos.endOrCursor)))
       t
     }
   }
@@ -59,7 +59,8 @@ class NoddyPlugin(override val global: Global) extends Plugin {
   override val description: String = s"Generates code when using an annotation named '$target'"
   override val name: String = "noddy"
 
-  abstract class TransformingComponent(override val global: Global) extends PluginComponent with TypingTransformers with WithPos with IsIde {
+  abstract class TransformingComponent(override val global: Global) extends PluginComponent
+    with TypingTransformers with WithPos with IsIde with BackCompat {
 
     val Noddy = global.newTypeName(target)
 
@@ -119,7 +120,7 @@ class NoddyPlugin(override val global: Global) extends Plugin {
       clazz.name.companionName,
       Template(
         List(Select(Ident(nme.scala_), nme.AnyRef.toTypeName)),
-        noSelfType,
+        emptyValDef, // deprecated in 2.11, but replacement not in 2.10
         List(
           DefDef(
             Modifiers(),

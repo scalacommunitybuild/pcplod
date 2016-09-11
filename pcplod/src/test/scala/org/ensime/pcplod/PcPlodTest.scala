@@ -40,16 +40,24 @@ class PcPlodTest extends FlatSpec with Logging {
   "Mr Plod" should "typecheck an uncompilable valid noddy file" in withMrPlod("com/acme/foo_bad.scala") { mr =>
     mr.typeAtPoint('foo) shouldBe Some("com.acme.Foo.type")
 
-    mr.typeAtPoint('input_a) shouldBe Some("<error>")
+    mr.typeAtPoint('input_a) should matchPattern {
+      case Some("<error>")  => // scala 2.11
+      case Some("<notype>") => // scala 2.10
+    }
 
     import org.ensime.pcplod.PcMessageSeverity._
-    val expected = List(
-      PcMessage("com/acme/foo_bad.scala", Error, "';' expected but '=' found."),
-      PcMessage("com/acme/foo_bad.scala", Error, "not found: value bar"),
-      PcMessage("com/acme/foo_bad.scala", Error, "not found: value a")
-    )
 
-    mr.messages shouldBe expected
+    mr.messages should matchPattern {
+      case List(
+        PcMessage("com/acme/foo_bad.scala", Error, "';' expected but '=' found."),
+        PcMessage("com/acme/foo_bad.scala", Error, "not found: value bar"),
+        PcMessage("com/acme/foo_bad.scala", Error, "not found: value a")
+        ) => // scala 2.11
+      case List(
+        PcMessage("com/acme/foo_bad.scala", Error, "';' expected but '=' found."),
+        PcMessage("com/acme/foo_bad.scala", Error, "not found: value bar")
+        ) => // scala 2.10
+    }
   }
 
   "Noddy parser" should "support noddy syntax" in {
