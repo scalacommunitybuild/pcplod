@@ -5,7 +5,7 @@
 Published as a regular artefact, the sbt installation is easy:
 
 ```scala
-libraryDependencies += "org.ensime" % "pcplod" %% "1.0.0" % "test"
+libraryDependencies += "org.ensime" %% "pcplod" % "1.0.0" % "test"
 ```
 
 The `dependencyOverrides` feature of SBT is recommended to ensure that the correct version of the scala compiler is used
