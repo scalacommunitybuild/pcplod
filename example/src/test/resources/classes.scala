@@ -50,3 +50,6 @@ object LoggingFutures {
   def b: Future[Long] = null
 }
 
+object Testing {
+  val me = Me(): Me
+}
