@@ -38,6 +38,10 @@ PC Plod uses the *loan pattern* to let you write tests in whatever testing frame
 Since you're simulating a scala developer who is using your macro / plugin to write scala code, you put the code that you want to test into the `test/resources` folder of your project (not `test/scala`). Add source resources as needed
 
 ```scala
+import org.ensime.pcplod._
+```
+
+```scala
 withPcPlod { pc =>
   pc.loadScala("path/to/package/foo.scala")
   // your tests here
