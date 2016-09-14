@@ -8,7 +8,7 @@ object ProjectPlugin extends SensiblePlugin {
   override def projectSettings = Seq(
     scalaVersion := "2.11.8",
     organization := "org.ensime",
-    version := "1.0.1-SNAPSHOT",
+    version := "1.1.0-SNAPSHOT",
     ScalariformKeys.preferences := FormattingPreferences().setPreference(AlignSingleLineCaseStatements, true),
     libraryDependencies ++= Sensible.testLibs(),
     javaOptions in Test ++= Seq(

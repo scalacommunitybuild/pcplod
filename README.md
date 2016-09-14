@@ -2,10 +2,15 @@
 
 ## Installation
 
-Published as a regular artefact, the sbt installation is easy:
+Published as a regular artefact, the sbt installation is easy, but require a few more steps than just adding a regular library:
 
 ```scala
-libraryDependencies += "org.ensime" %% "pcplod" % "1.0.0" % "test"
+libraryDependencies += "org.ensime" %% "pcplod" % "1.0.0" % "test",
+
+javaOptions in Test ++= Seq(
+  s"""-Dpcplod.settings=${(scalacOptions in Test).value.mkString(",")}""",
+  s"""-Dpcplod.classpath=${(fullClasspath in Test).value.map(_.data).mkString(",")}"""
+)
 ```
 
 The `dependencyOverrides` feature of SBT is recommended to ensure that the correct version of the scala compiler is used
@@ -21,12 +26,6 @@ scalacOptions in Test ++= {
   val jar = (packageBin in Compile).value
   Seq(s"-Xplugin:${jar.getAbsolutePath}", s"-Jdummy=${jar.lastModified}") // ensures recompile
 }
-```
-
-But to ensure that the plugin is used by pcplod, you must also add
-
-```scala
-javaOptions in Test += s"-Dpcplod.plugin=${(packageBin in Compile).value.getAbsolutePath}"
 ```
 
 ## How to use it
@@ -90,33 +89,3 @@ object F@foo@oo {
 ```
 
 in this case, the symbol `'foo` will refer to the letter `F` of `Foo` and the symbol `'input_a` will refer to the parameter `a` of `bar` (i.e. the character immediately before the marker). Noddy names can only be alphanumeric or underscore.
-
-## Customisation
-
-By default, PC Plod will make everything that is on the test's classpath available for use in the presentation compiler. However, you may wish to provide a custom jar, which can be provided to `withPcPlod` as a parameter (not available for `withMrPlod`). It is recommended to use sbt to generate the jar and inject it into the test environment as a property.
-
-```scala
-val jar = sys.props("pcplod.test1.jar")
-withPcPlod(jar) { pc =>
-  pc.loadScala("path/to/package/foo.scala")
-  // your tests here
-  pc.loadScala("path/to/package/bar.scala")
-  pc.unloadScala("path/to/package/foo.scala")
-  // more tests here
-}
-```
-
-## Example ENSIME Integration
-
-To add the example compiler plugin example to ENSIME, automatically compiling the plugin first, add this file to your local clone of the repository in `ensime.sbt`
-
-```scala
-import org.ensime.CommandSupport._
-
-EnsimeKeys.ensimeCompilerArgs <+= state.map { implicit s =>
-  implicit val structure = Project.extract(s).structure
-  implicit val plugin = structure.allProjectRefs.find(_.project == "example").get
-  val jar = (packageBin in plugin in Compile).run
-  s"-Xplugin:${jar.getCanonicalPath}"
-}
-```

@@ -2,6 +2,7 @@
 // License: http://www.apache.org/licenses/LICENSE-2.0
 package org.ensime.pcplod
 
+import java.io.File
 import java.util.logging.Logger
 import java.util.logging.Level._
 import scala.reflect.internal.util.{BatchSourceFile, OffsetPosition, Position}
@@ -12,18 +13,27 @@ import scala.tools.nsc.reporters.{Reporter, StoreReporter}
 private[pcplod] object PoshPresentationCompiler {
   private val log = Logger.getLogger(this.getClass.getName)
 
-  def create(pluginJarPathOpt: Option[String]): (PoshPresentationCompiler, StoreReporter) = {
+  def create(
+    classpath: List[File],
+    options: List[String]
+  ): (PoshPresentationCompiler, StoreReporter) = {
+    classpath.foreach {
+      entry => require(entry.isDirectory() || entry.isFile(), s"classpath entry $entry must exist")
+    }
+
     val settings = new Settings(log.severe)
     settings.YpresentationDebug.value = log.isLoggable(FINE)
     settings.YpresentationVerbose.value = log.isLoggable(FINER)
     settings.verbose.value = log.isLoggable(FINER)
 
-    settings.usejavacp.value = true
-    pluginJarPathOpt match {
-      case Some(jarPath) =>
-        settings.processArguments(List(s"-Xplugin:$jarPath"), processAll = false)
-      case None =>
+    if (classpath.isEmpty)
+      settings.usejavacp.value = true
+    else {
+      settings.usejavacp.value = false
+      settings.classpath.value = classpath.mkString(File.pathSeparator)
     }
+
+    settings.processArguments(options, processAll = false)
 
     val reporter: StoreReporter = new StoreReporter {
       protected override def info0(pos: Position, msg: String, severity: Severity, force: Boolean): Unit = {

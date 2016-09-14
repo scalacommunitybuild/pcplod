@@ -2,17 +2,19 @@
 // License: http://www.apache.org/licenses/LICENSE-2.0
 package org.ensime.pcplod
 
-import java.io.InputStream
+import java.io.{File, InputStream}
 import java.util.regex.Pattern
 
 import scala.reflect.internal.util.BatchSourceFile
 
 object PcPlod {
-  def apply(): PcPlod = new PcPlod(sys.props.get("pcplod.plugin"))
+  private def splitProp(name: String): List[String] =
+    sys.props.get(name).toList.flatMap(_.split(","))
 
-  def apply(optPluginJar: Option[String]): PcPlod = {
-    new PcPlod(optPluginJar)
-  }
+  def apply(): PcPlod = new PcPlod(
+    splitProp("pcplod.classpath").map(new File(_)),
+    splitProp("pcplod.settings")
+  )
 
   private val TokenPattern = Pattern.compile("@([a-zA-Z0-9_]+)@")
   // returns the cleaned file and the map of symbol names to locations
@@ -35,12 +37,15 @@ object PcPlod {
   }
 }
 
-class PcPlod(optPluginJar: Option[String]) {
+class PcPlod(
+  classpath: List[File],
+  options: List[String]
+) {
 
   case class FileInfo(path: String, contents: String, tokenLocations: Map[String, Int], f: BatchSourceFile)
 
   private var files: Map[String, FileInfo] = Map.empty
-  val (pc, reporter) = PoshPresentationCompiler.create(optPluginJar)
+  val (pc, reporter) = PoshPresentationCompiler.create(classpath, options)
 
   /**
    * Load a Scala file into the PC - the file is a resource location
