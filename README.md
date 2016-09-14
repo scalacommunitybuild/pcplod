@@ -5,7 +5,7 @@
 Published as a regular artefact, the sbt installation is easy, but require a few more steps than just adding a regular library:
 
 ```scala
-libraryDependencies += "org.ensime" %% "pcplod" % "1.0.0" % "test",
+libraryDependencies += "org.ensime" %% "pcplod" % "1.1.0" % "test",
 
 // WORKAROUND https://github.com/ensime/pcplod/issues/12
 fork in Test := true,
