@@ -17,8 +17,9 @@ private[pcplod] object PoshPresentationCompiler {
     classpath: List[File],
     options: List[String]
   ): (PoshPresentationCompiler, StoreReporter) = {
-    classpath.foreach {
-      entry => require(entry.isDirectory() || entry.isFile(), s"classpath entry $entry must exist")
+    classpath.foreach { entry =>
+      if (!entry.isDirectory() && !entry.isFile())
+        log.warning(s"classpath entry $entry does not exist")
     }
 
     val settings = new Settings(log.severe)
