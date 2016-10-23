@@ -11,6 +11,7 @@ build:
         exit 1 ;
       fi
     - git log | head -n 20
+    - if [[ $SCALA_VERSION == 2.12* ]] ; then echo "1.8" > .java-version ; fi
     - host `curl -s http://httpbin.org/ip | jq -r '.origin'` || true ;
       sbt ++$SCALA_VERSION ";test:compile ;doc";
       if $(! git diff --exit-code --quiet) ; then
@@ -25,5 +26,6 @@ build:
 
 matrix:
   SCALA_VERSION:
+    - 2.11.0-RC2
     - 2.11.8
     - 2.10.6
