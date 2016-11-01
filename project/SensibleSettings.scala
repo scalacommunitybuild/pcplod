@@ -67,7 +67,18 @@ object Sensible {
       "org.scalamacros" %% "quasiquotes" % quasiquotesVersion,
       "org.scalatest" %% "scalatest" % scalatestVersion
     ) ++ logback ++ guava ++ shapeless(scalaVersion.value)
-  ) ++ inConfig(Test)(testSettings) ++ scalariformSettings
+  ) ++ inConfig(Test)(testSettings) ++ scalariformSettings ++
+  Seq(Compile, Test).flatMap { sc =>
+    Seq(
+      // WORKAROUND https://github.com/sbt/sbt/issues/2819
+      crossPaths in sc := false,
+      unmanagedSourceDirectories in sc += {
+        val dir = (scalaSource in sc).value
+        val Some((major, minor)) = CrossVersion.partialVersion(scalaVersion.value)
+        file(dir.getPath + s"-$major.$minor")
+      }
+    )
+  }
 
   def testSettings = Seq(
     parallelExecution := true,
