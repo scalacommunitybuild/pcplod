@@ -4,14 +4,15 @@ build:
   environment:
     - SONATYPE_USERNAME=$$SONATYPE_USERNAME
     - SONATYPE_PASSWORD=$$SONATYPE_PASSWORD
-    - SBT_TASK_LIMIT=6
   commands:
     - if $(git grep -qE "TODO|FIXME" -- `git ls-files | grep -v .drone.yml`) ; then
         echo "Please remove TODO or FIXME. Create an issue at GitHub instead." ;
         exit 1 ;
       fi
     - git log | head -n 20
-    - if [[ $SCALA_VERSION == 2.12* ]] ; then echo "1.8" > .java-version ; fi
+    - host `curl -s http://httpbin.org/ip | jq -r '.origin'` || true ;
+    - case $SCALA_VERSION in 2.12*) echo 1.8 > .java-version ; esac ;
+      git update-index --assume-unchanged .java-version
     - host `curl -s http://httpbin.org/ip | jq -r '.origin'` || true ;
       sbt ++$SCALA_VERSION ";test:compile ;doc";
       if $(! git diff --exit-code --quiet) ; then
@@ -19,7 +20,7 @@ build:
         git --no-pager diff ;
         exit 1 ;
       fi
-    - sbt ++$SCALA_VERSION ";test"
+    - sbt ++$SCALA_VERSION ";test" pcplod/mimaReportBinaryIssues
     - if [ -z "$CI_PULL_REQUEST" ] ; then
         sbt ++$SCALA_VERSION pcplod/publish ;
       fi
