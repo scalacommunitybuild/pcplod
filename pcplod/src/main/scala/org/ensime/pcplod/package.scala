@@ -7,12 +7,13 @@ import java.io.File
 package object pcplod {
 
   def withPcPlod[T](
-    classpath: List[File] = Nil,
-    options: List[String] = Nil
+    classpath: List[File],
+    options: List[String]
   )(f: PcPlod => T): T =
     f(new PcPlod(classpath, options))
 
-  def withPcPlod[T](f: PcPlod => T): T = withPcPlod()(f)
+  def withPcPlod[T](f: PcPlod => T): T =
+    f(PcPlod())
 
   def withMrPlod[T](res: String)(f: MrPlod => T): T = f(MrPlod(res))
 
