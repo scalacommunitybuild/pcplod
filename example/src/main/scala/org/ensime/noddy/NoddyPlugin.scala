@@ -39,7 +39,9 @@ trait WithPos { this: BackCompat =>
   implicit class RichTree[T <: global.Tree](t: T) {
     /** when generating a tree, use this to generate positions all the way down. */
     def withAllPos(pos: Position): T = {
-      t.foreach(_.setPos(new TransparentPosition(pos.source, pos.startOrCursor, pos.endOrCursor, pos.endOrCursor)))
+      t.foreach { p =>
+        val _ = p.setPos(new TransparentPosition(pos.source, pos.startOrCursor, pos.endOrCursor, pos.endOrCursor))
+      }
       t
     }
   }
