@@ -1,6 +1,6 @@
 inThisBuild {
   Seq(
-    scalaVersion := "2.12.2",
+    scalaVersion := "2.12.3",
     organization := "org.ensime",
     sonatypeGithub := ("ensime", "pcplod"),
     licenses := Seq(Apache2),
