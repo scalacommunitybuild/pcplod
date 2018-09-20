@@ -1,12 +1,18 @@
+val slf4jVersion = "1.7.25"
+
 inThisBuild {
   Seq(
-    scalaVersion := "2.12.3",
+    scalaVersion := "2.12.6",
     organization := "org.ensime",
-    sonatypeGithub := ("ensime", "pcplod"),
-    licenses := Seq(Apache2),
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-compiler" % scalaVersion.value,
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+      "org.scalatest"  %% "scalatest" % "3.0.4" % Test,
+      "ch.qos.logback" % "logback-classic"  % "1.2.3" % Test,
+      "org.slf4j"      % "slf4j-api"        % slf4jVersion % Test,
+      "org.slf4j"      % "jul-to-slf4j"     % slf4jVersion % Test,
+      "org.slf4j"      % "jcl-over-slf4j"   % slf4jVersion % Test,
+      "org.slf4j"      % "log4j-over-slf4j" % slf4jVersion % Test
     )
   )
 }
